@@ -1,0 +1,9 @@
+pygame
+scipy
+numpy
+sounddevice
+soundfile
+pydub
+ffmpeg
+sortedcontainers
+ffprobe
