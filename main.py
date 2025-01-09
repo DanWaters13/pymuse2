@@ -1,4 +1,5 @@
 import os
+from src.tests.test_main import *
 
 def main():
-  pass
+  test_main()
