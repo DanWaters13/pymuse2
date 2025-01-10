@@ -1,0 +1,6 @@
+{
+    "name": "SoundConfig",
+    "default_sample_rate": 44100,
+    "default_channels": 2,
+    "default_dtype": "float32"
+}

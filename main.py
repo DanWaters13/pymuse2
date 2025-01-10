@@ -1,5 +1,8 @@
-import os
 from src.tests.test_main import *
+from src.core.log import *
 
 def main():
-  test_main("", True)
+  test_main()
+
+if __name__ == "__main__":
+  main()
