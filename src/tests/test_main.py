@@ -5,6 +5,7 @@ from src.tests.test_json_manager import test_json_manager
 from src.tests.test_style import test_style
 from src.tests.test_camera import test_camera
 from src.tests.test_geometry import test_geometry
+from src.tests.test_view import test_view
 
 def test_main(indent=""):
   log("Testing main", indent, True)
@@ -14,6 +15,7 @@ def test_main(indent=""):
     "json manager": (test_json_manager, True),
     "camera": (test_camera, True),
     "geometry": (test_geometry, True),
+    "view": (test_view, True),
   }
   print(f"{len(tests)}")
   results = {}
