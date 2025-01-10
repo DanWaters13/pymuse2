@@ -1,19 +1,23 @@
 import pygame
 from src.core.geometry import Rect, Vector
-from src.core.view import View
+from src.core.view_component import ComponentView
 from src.core.style import Style
 from src.core.button import SoundButton
+from src.core.slider import Slider  # Import Slider
 from src.core.log import log
 from pathlib import Path
+import traceback as tb
+import sys
+
 
 def test_view(indent="", verbose=True):
     pygame.init()
     try:
-        pygame.display.set_caption("Test View with SoundButton")
+        pygame.display.set_caption("Test View with SoundButton and Slider")
         clock = pygame.time.Clock()
 
         # Initialize a View
-        root_view = View(800, 600)
+        root_view = ComponentView(None, Path("config") / "view.json")
 
         # Define Style for Button
         button_style = Style()
@@ -24,13 +28,29 @@ def test_view(indent="", verbose=True):
         }
 
         # Define SoundButton
-        button_rect = Rect(Vector(300, 250), Vector(200,100))
-        sound_button = SoundButton(rect=button_rect, style=button_style, \
-                sound_file=Path("audio")/"short.mp3", text="Play Sound")
-        sound_button.set_callback(sound_button.sound.play)  # Assign the callback to play the sound
+        sound_button = SoundButton(
+            rect=pygame.Rect(300,400,200,100),
+            style=button_style,
+            sound_file=Path("audio") / "short.mp3",
+            text="Play Sound",
+        )
+        sound_button.set_callback(sound_button.sound.play)  # Assign callback to play the sound
 
         # Add SoundButton to View
         root_view.children.append(sound_button)
+
+        # Define Style for Slider
+        slider_style = Style()
+        slider_style.colors = {
+            "background": (80, 80, 80),
+            "foreground": (255, 255, 255),
+        }
+
+        # Define Slider
+        slider = Slider(min_val=0, max_val=1023, current=512, rect=pygame.Rect(300, 400, 400, 20), style=slider_style)
+
+        # Add Slider to View
+        root_view.children.append(slider)
 
         running = True
         while running:
@@ -41,10 +61,12 @@ def test_view(indent="", verbose=True):
 
                 # Handle events for the root view and its components
                 root_view.handle_event(event)
+
             if not running:
                 break
+
             # Clear screen
-            root_view.screen.fill((0, 0, 0))  # Black background
+            root_view.canvas.fill((0, 0, 0))  # Black background
 
             # Draw the root view and its components
             root_view.draw()
@@ -55,5 +77,9 @@ def test_view(indent="", verbose=True):
         pygame.quit()
         return True
     except Exception as e:
-        log(f"Exception: {e}", indent, verbose)
+        log(f"View tests failed: {e}", indent, verbose)
+        exec_type, exec_value, third = sys.exc_info()
+        print(exec_type.__name__)
+        print(exec_value)
+        tb.print_tb(third)
         return False

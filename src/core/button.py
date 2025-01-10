@@ -2,11 +2,12 @@ import pygame
 from src.core.geometry import *
 from src.core.style import *
 from src.core.sound import *
+from src.core.component import Component
 
-class Button:
-    def __init__(self, rect: Rect, style: Style, text: str = ""):
+class Button(Component):
+    def __init__(self, rect: pygame.Rect, style: Style, text: str = ""):
+        super().__init__(rect, style)
         self.rect = rect
-        self.style = style
         self.text = text
         self.callback = None
 
@@ -15,18 +16,26 @@ class Button:
 
     def draw(self, canvas):
         # Draw the button background
-        pygame.draw.rect(canvas, self.style.colors["background"], self.rect.to_pygame_rect())
+        pygame.draw.rect(canvas, self.style.colors["background"], self.rect)
         # Draw the button text
         font = self.style.colors.get("font", pygame.font.Font(None, 36))
+        if "text" in self.style.colors:
+            text_color = self.style.colors["text"]
+        elif "font" in self.style.colors:
+            text_color = self.style.colors["font"]
+        elif "foreground" in self.style.colors:
+            text_color = self.style.colors["foreground"]
+        else:
+            text_color = (255, 255, 255)
+
         text_surface = font.render(self.text, True, self.style.colors["text"])
-        canvas.blit(
-            text_surface,
-            text_surface.get_rect(center=self.rect.to_pygame_rect().center),
-        )
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        canvas.blit(text_surface, text_rect)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
-            if self.rect.contains(*event.pos):
+            x,y = event.pos
+            if self.rect.contains(pygame.Rect(x,y,1,1)):
                 if self.callback:
                     self.callback()
 

@@ -43,6 +43,7 @@ class Vector:
         return Vector(*(a - b for a, b in zip(self.coords, other.coords)))
 
 
+
 class Shape(ABC):
     def __init__(self):
         self.style = None  # Placeholder for style

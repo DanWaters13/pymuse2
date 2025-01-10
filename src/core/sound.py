@@ -4,9 +4,11 @@ import sounddevice as sd
 import numpy as np
 from scipy.signal import resample
 from src.core.json_manager import JSONManager
+from src.core.engine import Engine
+import os
 
 class Sound:
-    def __init__(self, file_path, config_path="config/sound.json"):
+    def __init__(self, file_path, config_path=Path("config")/"sound.json"):
         # Load configuration
         config = JSONManager.load_json(config_path)
         self.sample_rate = config.get("default_sample_rate", 44100)
@@ -14,12 +16,12 @@ class Sound:
         self.dtype = config.get("default_dtype", "float32")
 
         # Load the sound file
-        self.file_path = Path(file_path)
-        if not self.file_path.exists():
+        self.file_path = file_path
+        if not os.path.exists(f"{self.file_path}"):
             raise FileNotFoundError(f"Sound file not found: {self.file_path}")
         
         # Read audio data and properties
-        self.data, self.samplerate = sf.read(self.file_path, dtype=self.dtype)
+        self.data, self.samplerate = sf.read(f"{self.file_path}", dtype=self.dtype)
         
         # Resample if necessary
         if self.samplerate != self.sample_rate:
@@ -72,3 +74,37 @@ class Sound:
             self.stream.write(self.data)
             if num > 0:
                 num -= 1
+
+
+class LiveInputSound:
+    def __init__(self, file_path, engine: Engine):
+        self.engine = engine
+        self.data, self.samplerate = sf.read(f"{file_path}")
+        self.stream = None
+
+    def play(self):
+        """Start the playback stream."""
+        self.stream = sd.OutputStream(
+            samplerate=self.samplerate,
+            channels=self.data.shape[1],
+            callback=self.audio_callback,
+        )
+        self.stream.start()
+
+    def audio_callback(self, outdata, frames, time, status):
+        """Stream callback for dynamic playback speed."""
+        play_speed = self.engine.get_play_speed()
+        if play_speed == 0:
+            outdata.fill(0)
+            return
+
+        step = int(play_speed * self.samplerate)
+        indices = np.arange(0, frames * step, step, dtype=int) % len(self.data)
+        outdata[:] = self.data[indices]
+
+    def stop(self):
+        """Stop the playback stream."""
+        if self.stream:
+            self.stream.stop()
+            self.stream.close()
+            self.stream = None

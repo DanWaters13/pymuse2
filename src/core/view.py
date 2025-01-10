@@ -2,19 +2,23 @@ import pygame
 from typing import List
 from src.core.style import Style
 from collections.abc import Callable
+from pathlib import Path
+from src.core.json_manager import *
 
 class View:
-    def __init__(self, width: int, height: int):
-        """Initialize a view with a black canvas."""
-        self.width = width
-        self.height = height
-        self.children: List[View] = []
+    def __init__(self, canvas=None, config_path=Path("config")/"view.json"):
+        self.view_config = ViewConfig(config_path)
 
-        # Initialize Pygame and set up a display
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("Generic View")
-        self.background_color = (0, 0, 0)  # Black background
+        # Use the configuration values
+        self.width = self.view_config.default_width
+        self.height = self.view_config.default_height
+        self.delay = self.view_config.default_delay
+
+        # Initialize canvas
+        self.canvas = canvas or pygame.display.set_mode((self.width, self.height))
+        self.children = []
+        self.running = True
+
 
     def add_child(self, child: 'View'):
         """Add a child component to this view."""
@@ -22,9 +26,9 @@ class View:
 
     def draw(self):
         """Draw the view and its children."""
-        self.screen.fill(self.background_color)
+        self.canvas.fill((0,0,0))
         for child in self.children:
-            child.draw(self.screen)
+            child.draw(self.canvas)
         pygame.display.flip()
 
     def handle_event(self, event):
