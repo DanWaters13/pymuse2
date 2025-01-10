@@ -35,7 +35,7 @@ class Button(Component):
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
             x,y = event.pos
-            if self.rect.contains(pygame.Rect(x,y,1,1)):
+            if self.rect.collidepoint(x,y):
                 if self.callback:
                     self.callback()
 

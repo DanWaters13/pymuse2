@@ -2,6 +2,7 @@ import pygame
 from src.core.geometry import Rect, Vector
 from src.core.view_component import ComponentView
 from src.core.style import Style
+from src.core.sound import Sound
 from src.core.button import SoundButton
 from src.core.slider import Slider  # Import Slider
 from src.core.log import log
@@ -47,7 +48,10 @@ def test_view(indent="", verbose=True):
         }
 
         # Define Slider
-        slider = Slider(min_val=0, max_val=1023, current=512, rect=pygame.Rect(300, 400, 400, 20), style=slider_style)
+        sound = Sound(Path("audio")/"short.mp3")
+        slider = Slider(511, 0, 1023, pygame.Rect(300, 400, 400, 20), slider_style)
+        slider.callback = lambda: sound.set_speed(slider.current)
+        sound.play()
 
         # Add Slider to View
         root_view.children.append(slider)
